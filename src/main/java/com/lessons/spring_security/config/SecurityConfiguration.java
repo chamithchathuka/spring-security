@@ -1,7 +1,10 @@
 package com.lessons.spring_security.config;
 
+import com.lessons.spring_security.service.UserInfoUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -19,17 +22,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfiguration {
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-
-        UserDetails admin = User.withUsername("admin")
-                .password(passwordEncoder.encode("admin"))
-                .accountExpired(false).accountLocked(false).roles("ADMIN").build();
-
-        UserDetails user = User.withUsername("user")
-                .password(passwordEncoder.encode("user"))
-                .accountExpired(false).accountLocked(false).roles("USER").build();
-
-        return new InMemoryUserDetailsManager(admin, user);
+    public UserDetailsService userDetailsService() {
+        return new UserInfoUserDetailsService();
     }
 
     @Bean
@@ -38,9 +32,8 @@ public class SecurityConfiguration {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/products/welcome").permitAll()
+                        .requestMatchers("/products/welcome","/user/create").permitAll()
                         .requestMatchers("/products/secure").hasRole("ADMIN")
-                        .requestMatchers("/products/user").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(withDefaults())
@@ -50,5 +43,14 @@ public class SecurityConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider daoAuthenticationProvider
+                = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService());
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        return daoAuthenticationProvider;
     }
 }

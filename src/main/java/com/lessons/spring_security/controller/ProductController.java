@@ -6,8 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/products")
+
 @RestController
+@RequestMapping("/products")
 public class ProductController {
 
 
@@ -24,8 +25,8 @@ public class ProductController {
         product.setProductName("user Product");
         return ResponseEntity.ok(product);
     }
-        @GetMapping("/welcome")
-        public ResponseEntity<String> getWelcome() {
-            return ResponseEntity.ok("Welcome");
-        }
+    @GetMapping("/welcome")
+    public ResponseEntity<String> getWelcome() {
+        return ResponseEntity.ok("Welcome");
+    }
 }
